@@ -19,6 +19,8 @@ const incumbentFrame = document.querySelector("#incumbent");
 const currentFrame = document.querySelector("#current");
 const relevantFrame = document.querySelector("#relevant");
 
+const bodyMethods = ["arrayBuffer", "blob", "formData", "json", "text"];
+
 function isObjectFromGlobal(object, global) {
    return object instanceof global.Object;
 }
@@ -60,6 +62,40 @@ window.addEventListener("load", () => {
 
     assert_response(response, relevantFrame.contentWindow, "relevant");
   }, "fetch()");
+
+  bodyMethods.forEach(method => {
+    promise_test(async t => {
+      // This data URL was chosen as it works for formData() and json()
+      const response = await incumbentFrame.contentWindow.runFetch("data:application/x-www-form-urlencoded,[]");
+
+      const bodyPromise = response[method]();
+
+      assert_true(isObjectFromGlobal(bodyPromise, relevantFrame.contentWindow), `Response's ${method}()'s promise should use the relevant global`);
+
+      // Primitive types don't have a global
+      if (method === "text") {
+        return;
+      }
+
+      const body = await bodyPromise;
+
+      assert_true(isObjectFromGlobal(body, relevantFrame.contentWindow), `Response's ${method}()'s object should use the relevant global`);
+    }, `Response's ${method}()`);
+  });
+
+  promise_test(async t => {
+    const response = await incumbentFrame.contentWindow.runFetch("data:,");
+
+    // Consume the response
+    await response.arrayBuffer();
+
+    // Verify rejected promises
+    return Promise.all(bodyMethods.map(method => {
+      const rejectedPromise = response[method]();
+      assert_true(isObjectFromGlobal(rejectedPromise, relevantFrame.contentWindow), `Response's ${method}()'s rejected promise should use the relevant global`)
+      return promise_rejects_js(t, relevantFrame.contentWindow.TypeError, rejectedPromise);
+    }));
+  }, `Response's Body methods and rejected promises`);
 
   promise_test(async t => {
     const request = new Request("../resources/echo-content.py");
