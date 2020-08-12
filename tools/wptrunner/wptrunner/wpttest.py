@@ -100,8 +100,10 @@ class RunInfo(dict):
             rev = GitTree(log_error=False).rev
         except (OSError, subprocess.CalledProcessError):
             rev = None
+        print('rev:')
+        print(rev)
         if rev:
-            self["revision"] = rev
+            self["revision"] = rev.decode("utf-8") 
 
         self["python_version"] = sys.version_info.major
         self["product"] = product
