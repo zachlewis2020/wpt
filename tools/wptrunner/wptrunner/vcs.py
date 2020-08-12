@@ -53,8 +53,15 @@ def bind_to_repo(vcs_func, repo, log_error=True):
 
 
 def is_git_root(path, log_error=True):
+    print('is_git_root for', path)
     try:
         rv = git("rev-parse", "--show-cdup", repo=path, log_error=log_error)
+        print('rv:', rv)
     except subprocess.CalledProcessError:
+        print('error')
         return False
+    print('rv == "\\n" ?')
+    print(rv == "\n")
+    print('rv == b"\\n" ?')
+    print(rv == b"\n")
     return rv == "\n"

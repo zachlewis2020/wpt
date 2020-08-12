@@ -97,11 +97,13 @@ class RunInfo(dict):
         from .update.tree import GitTree
         try:
             # GitTree.__init__ throws if we are not in a git tree.
-            rev = GitTree(log_error=False).rev
+            rev = GitTree(log_error=True).rev
         except (OSError, subprocess.CalledProcessError):
             rev = None
         if rev:
             self["revision"] = rev
+        print('Did we get a revision?')
+        print(rev)
 
         self["python_version"] = sys.version_info.major
         self["product"] = product
