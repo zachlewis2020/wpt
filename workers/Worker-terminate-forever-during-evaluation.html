@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<title>Test Worker.terminate() for a worker that tries to run forever after top-level script evaluation is started.</title>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script>
+async_test((t) => {
+  const worker = new Worker('support/Worker-run-forever.js');
+  worker.onmessage = () => {
+    worker.terminate();
+    t.step_timeout(function() { t.done(); }, 3000);
+  };
+}, 'Tests terminating a worker that is trying to run forever.');
+</script>
