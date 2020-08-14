@@ -68,6 +68,10 @@ components:
       --this-chunk=${chunks.id}
       --total-chunks=${chunks.total}
       --test-type=${vars.suite}
+      --exclude=/infrastructure/server/http2-context.sub.h2.any.html
+      --exclude=/infrastructure/server/http2-context.sub.h2.any.worker.html
+      --exclude=/infrastructure/server/http2-context.sub.h2.any.serviceworker.html
+      --exclude=/infrastructure/server/http2-context.sub.h2.any.sharedworker.html
 
   trigger-master:
     trigger:
