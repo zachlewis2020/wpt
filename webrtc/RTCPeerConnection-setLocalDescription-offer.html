@@ -222,4 +222,17 @@
     await sldPromise;
   }, "setLocalDescription(offer) should update internal state with a queued task, in the right order");
 
+promise_test(async t => {
+  const pc1 = new RTCPeerConnection();
+  t.add_cleanup(() => pc1.close());
+  pc1.onicecandidate = assert_unreached;
+  let candidateWaiter;
+  await pc1.setLocalDescription(await pc1.createOffer()).then(() => {
+    candidateWaiter = new Promise(resolve => {
+      pc1.onicecandidate = resolve;
+    });
+  });
+  await candidateWaiter;
+}, 'Candidate firing should only happen after the SLD promise has settled');
+
 </script>

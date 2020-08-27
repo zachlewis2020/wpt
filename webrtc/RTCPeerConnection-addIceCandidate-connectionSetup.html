@@ -1,0 +1,40 @@
+<!doctype html>
+<title>Test RTCPeerConnection.prototype.addIceCandidate</title>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="RTCPeerConnection-helper.js"></script>
+<script>
+  'use strict';
+
+// This test may be flaky, so it's in its own file.
+// The test belongs in RTCPeerConnection-addIceCandidate.
+promise_test(async t => {
+  const pc1 = new RTCPeerConnection();
+  const pc2 = new RTCPeerConnection();
+  t.add_cleanup(() => pc1.close());
+  t.add_cleanup(() => pc2.close());
+  const transceiver = pc1.addTransceiver('video');
+
+  exchangeIceCandidates(pc1, pc2);
+  await exchangeOffer(pc1, pc2);
+  await new Promise((resolve) => {
+    if (pc1.iceGatheringState == 'complete') {
+      resolve();
+      return;
+    };
+    pc1.addEventListener('icegatheringstatechange', () => {
+      if (pc1.iceGatheringState == 'complete') {
+        resolve();
+      }
+    });
+  });
+  // Ensure that any queued events such as candidate surfacing complete
+  // before exchangeAnswer.
+  await new Promise((resolve) => {
+    t.step_timeout(resolve, 0);
+  });
+  await exchangeAnswer(pc1, pc2);
+  await waitForState(transceiver.sender.transport, 'connected');
+}, 'If all candidates arrive before answer is generated, connection should work');
+
+</script>
