@@ -45,6 +45,14 @@
         "required_csp": "frame-src http://b.com:80", 
         "returned_csp": "child-src https://b.com:443", 
         "expected": IframeLoad.EXPECT_LOAD },
+      { "name": "Iframe should block if plugin-types directive is not subsumed.",
+        "required_csp": "plugin-types application/pdf",
+        "returned_csp": null,
+        "expected": IframeLoad.EXPECT_BLOCK },
+      { "name": "Iframe should load if plugin-types directive is subsumed.",
+        "required_csp": "plugin-types application/pdf application/x-java-applet",
+        "returned_csp": "plugin-types application/pdf",
+        "expected": IframeLoad.EXPECT_LOAD },
     ];
 
     tests.forEach(test => {
